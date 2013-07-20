@@ -11,35 +11,34 @@ Kraken.on("connectedToDatabase", (function(error) {
 
 	console.log("Connected to db");
 
-	var user = new User();
-	user.loadByEmail('austin.lange@gmail.com', (function(error) {
-		if (error) {
-			return console.log(error);
-		}
+	
 
-		user.lname = 'Lange';
-		user.fname = 'Austin';
-
-		user.update(function(error) {
-			console.log("[%d] %s %s <%s>", user.id, user.fname, user.lname, user.email);		
-		});
-
-	}).bind(this));
 
 	var sam;
 	User.create({
 		'email': 'sam.kelly.developer@gmail.com',
-		'fname': 'sam',
-		'lname': 'kelly',
-		'password': 'password'
+		'name': 'sam kelly',
+		'password': 'password',
+		'status': 1,
+		'login': 'sam.kelly',
+		'created': new Date()
 	}, (function(error, user) {
 		if (error) {
-			return console.log(error);
+			console.log(error);
+			sam = new User();
+			return sam.loadById(21, (function(error) {
+				if (error) {
+					return console.log(error);
+				}
+
+				return console.log(sam.toJSON());
+
+			}).bind(this));
 		}
 
 		sam = user;
 
-		return console.log("[%d] %s %s <%s>", sam.id, sam.fname, sam.lname, sam.email);
+		return console.log("[%d] %s <%s> created", sam.id, sam.name, sam.email);
 	}).bind(this));
 
 }).bind(Kraken));

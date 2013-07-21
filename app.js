@@ -11,34 +11,6 @@ Laser.on("connectedToDatabase", (function(error) {
 
 	console.log("LASER: Connected to db");
 
-	return;
-	var sam;
-	User.create({
-		'email': 'sam.kelly.developer@gmail.com',
-		'name': 'sam kelly',
-		'password': 'password',
-		'status': 1,
-		'login': 'sam.kelly',
-		'created': new Date()
-	}, (function(error, user) {
-		if (error) {
-			console.log(error);
-			sam = new User();
-			return sam.loadById(21, (function(error) {
-				if (error) {
-					return console.log(error);
-				}
-
-				return console.log(sam.toJSON());
-
-			}).bind(this));
-		}
-
-		sam = user;
-
-		return console.log("[%d] %s <%s> created", sam.id, sam.name, sam.email);
-	}).bind(this));
-
 }).bind(Laser));
 
 Laser.openDatabase();

@@ -29,8 +29,9 @@ module.exports = function(app) {
 				return sendError("User does not exist", response);
 			}
 
-			user.fname = request.body.fname || user.fname;
-			user.lname = request.body.lname || user.lname;
+			user.name = request.body.name || user.name;
+			user.email = request.body.email || user.email;
+			user.phone = request.body.phone || user.phone;
 
 			user.update((function(error) {
 				if (error) {
@@ -46,8 +47,8 @@ module.exports = function(app) {
 	app.post("/api/:version/user", function(request, response, next) {
 		var missingFields = [];
 
-		if (!request.body.email) {
-			missingFields.push("email");
+		if (!request.body.login) {
+			missingFields.push("login");
 		}
 
 		if (!request.body.password) {
@@ -84,8 +85,8 @@ module.exports = function(app) {
 		}).bind(this);
 
 		if (isNaN(request.params.id)) {
-			console.log("Looking up user by email: %s", request.params.id);
-			user.loadByEmail(request.params.id, respond);
+			console.log("Looking up user by login: %s", request.params.id);
+			user.loadByLogin(request.params.id, respond);
 		} else {
 			console.log("Looking up user by ID: %d", request.params.id);
 			user.loadById(request.params.id, respond);

@@ -1,19 +1,17 @@
 
-var KRAKEN = require('./lib/kraken');
-var Kraken = new KRAKEN({});
+var LASER = require('./lib/laser');
+var Laser = new LASER({});
 var User = require('./lib/user');
 
-Kraken.on("connectedToDatabase", (function(error) {
+Laser.on("connectedToDatabase", (function(error) {
 	if (error) {
 		console.log(error);
 		return;
 	}
 
-	console.log("Connected to db");
+	console.log("LASER: Connected to db");
 
-	
-
-
+	return;
 	var sam;
 	User.create({
 		'email': 'sam.kelly.developer@gmail.com',
@@ -41,9 +39,9 @@ Kraken.on("connectedToDatabase", (function(error) {
 		return console.log("[%d] %s <%s> created", sam.id, sam.name, sam.email);
 	}).bind(this));
 
-}).bind(Kraken));
+}).bind(Laser));
 
-Kraken.openDatabase();
+Laser.openDatabase();
 
 // bind process events to the app
 //process.on("exit", (Kraken.onProcessExit).bind(tos));

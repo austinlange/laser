@@ -1,6 +1,7 @@
 <html>
 	<head>
 		<title>Laser</title>
+		<link rel="stylesheet" type="text/css" href="assets/css/font-awesome/css/font-awesome.min.css">
 		<link rel='stylesheet' href='style.css' type='text/css'>
 	</head>
 	<body class='login-page'>
@@ -24,6 +25,6 @@
 				<a href='#b'>Sign Up</a>
 			</p>
 		</div>
-		<script src="http://code.jquery.com/jquery-1.10.1.min.js"></script>
+		<script type='text/javascript' src="assets/jquery-1.10.2.min.js"></script>
 	</body>
 <html>

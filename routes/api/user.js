@@ -35,10 +35,10 @@ module.exports = function(app) {
 
 			user.update((function(error) {
 				if (error) {
-					return sendError(error, response);
+					return sendError(error.message, response);
 				}
 
-				return sendObject(user.toJSON(), response);
+				return sendSuccess(user.toJSON(), response);
 			}).bind(this));
 
 		}).bind(this));
@@ -51,21 +51,16 @@ module.exports = function(app) {
 			missingFields.push("login");
 		}
 
-		if (!request.body.password) {
-			missingFields.push("password");
-		}
-
 		if (missingFields.length > 0) {
 			return sendError("Missing fields: " + missingFields.join(', '), response);
 		} 
 
 		User.create(request.body, (function(error, user) {
 			if (error) {
-				console.log("Error creating user: " + error);
-				return sendError("Error creating user: " + error, response);
+				return sendError(error.message, response);
 			}
 
-			return sendObject(user, response);
+			return sendSuccess(user.toJSON(), response);
 		}).bind(this));
 	});
 

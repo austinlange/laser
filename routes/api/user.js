@@ -96,8 +96,6 @@ module.exports = function(app) {
 			return sendError("No fields to search", response);
 		}
 
-		var emailFinished = false;
-		var nameFinished = false;
 		var searchResults = [];
 
 		var handleResults = function(list) {
@@ -105,44 +103,31 @@ module.exports = function(app) {
 			for (var k = 0; k < list.length; k++) {
 				searchResults.push(list[k].toJSON());
 			}
-			if (emailFinished && nameFinished) {
-				return sendSuccess(searchResults, response);
-			}
+
+			return sendSuccess(searchResults, response);
 		}
 
-		var email = request.query.email + "";
-		var name = request.query.name + "";
-
+		var searchFields = [];
+		var searchTerms = [];
 		if (request.query.email) {
-			User.searchByField('email', email.toLowerCaseString(), (function(error, list) {
-				if (error) {
-					return sendError(error.message, response);
-				}
-				emailFinished = true;
-				if (!list) {
-					return sendError("null response from database", response);
-				}
-				return handleResults(list || []);
-			}).bind(this));
-		} else {
-			emailFinished = true;
+			searchFields.push('email');
+			searchTerms.push(request.query.email.toLowerCase());
 		}
 
 		if (request.query.name) {
-			return User.searchByField('name', request.query.name.toLowerCase(), (function(error, list) {
-				if (error) {
-					return sendError(error.message, response);
-				}
-				if (!list) {
-					return sendError("null response from database", response);
-				}
-
-				nameFinished = true;
-				return handleResults(list || []);
-			}).bind(this));
-		} else {
-			nameFinished = true;
+			searchFields.push('name');
+			searchTerms.push(request.query.name.toLowerCase());
 		}
+
+		User.searchByFields(searchFields, searchTerms, (function(error, list) {
+			if (error) {
+				return sendError(error.message, response);
+			}
+			if (!list) {
+				return sendError("null response from database", response);
+			}
+			return handleResults(list || []);
+		}).bind(this));
 
 	}).bind(this));
 

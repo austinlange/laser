@@ -6,7 +6,8 @@ module.exports = function(app) {
 	};
 
 	var sendSuccess = function(data, response) {
-		return response.json(200, {"success": true, "data": data});
+
+		return response.json(200, {"success": true, "type": Array.isArray(data) ? "list" : typeof(data), "data": data});
 	};
 
 	var sendObject = function(object, response) {
@@ -52,7 +53,7 @@ module.exports = function(app) {
 		}
 
 		if (missingFields.length > 0) {
-			return sendError("Missing fields: " + missingFields.join(', '), response);
+			return sendError("Missing fields: " + missingFields.join(", "), response);
 		} 
 
 		User.create(request.body, (function(error, user) {
@@ -66,7 +67,7 @@ module.exports = function(app) {
 
 	app.get("/api/:version/user/:id", (function(request, response, next) {
 		if (!request.params.id) {
-			return sendError("Missing required parameter 'id'");
+			return sendError("Missing required parameter: id");
 		}
 
 		var user = new User();
@@ -81,19 +82,68 @@ module.exports = function(app) {
 
 		if (isNaN(request.params.id)) {
 			console.log("Looking up user by login: %s", request.params.id);
-			user.loadByLogin(request.params.id, respond);
+			return user.loadByLogin(request.params.id, respond);
 		} else {
 			console.log("Looking up user by ID: %d", request.params.id);
-			user.loadById(request.params.id, respond);
+			return user.loadById(request.params.id, respond);
 		}
 	}).bind(this));
 
-	// 404 everything else
-    app.all(/^\/api\/.*/, function(request, response, next) { 
-		console.log(request.method.toUpperCase() + " 404: " + request.url);
-		
-		response.statusCode = 404;
-		response.contentType("json");
-		response.send({"error": "The requested resource was not found."});
-	});
-}
+	app.get("/api/:version/user", (function(request, response, next) {
+		console.log(request.query);
+
+		if (!request.query.email && !request.query.name) {
+			return sendError("No fields to search", response);
+		}
+
+		var emailFinished = false;
+		var nameFinished = false;
+		var searchResults = [];
+
+		var handleResults = function(list) {
+
+			for (var k = 0; k < list.length; k++) {
+				searchResults.push(list[k].toJSON());
+			}
+			if (emailFinished && nameFinished) {
+				return sendSuccess(searchResults, response);
+			}
+		}
+
+		var email = request.query.email + "";
+		var name = request.query.name + "";
+
+		if (request.query.email) {
+			User.searchByField('email', email.toLowerCaseString(), (function(error, list) {
+				if (error) {
+					return sendError(error.message, response);
+				}
+				emailFinished = true;
+				if (!list) {
+					return sendError("null response from database", response);
+				}
+				return handleResults(list || []);
+			}).bind(this));
+		} else {
+			emailFinished = true;
+		}
+
+		if (request.query.name) {
+			return User.searchByField('name', request.query.name.toLowerCase(), (function(error, list) {
+				if (error) {
+					return sendError(error.message, response);
+				}
+				if (!list) {
+					return sendError("null response from database", response);
+				}
+
+				nameFinished = true;
+				return handleResults(list || []);
+			}).bind(this));
+		} else {
+			nameFinished = true;
+		}
+
+	}).bind(this));
+
+};

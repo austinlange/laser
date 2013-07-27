@@ -13,32 +13,45 @@ module.exports = function(app) {
 		return response.json(200, object);
 	};
 
-	app.get('/equipment', function(request, response, next) {
+	app.get("/api/:version/equipment/:id", function(request, response, next) {
+		// equipment by id or barcode
+		if (!request.params.id) {
+			return sendError('Missing required parameter id', response);
+		}
+
+		var equipment = new Equipment();
+
+		if (/^000?\d{2,3}$/.test(request.params.id)) {
+			return equipment.loadByBarcode(request.params.id, (function(error) {
+				if (error) {
+					return sendError(error.message, response);
+				}
+
+				return sendSuccess(equipment.toJSON(), response);
+			}).bind(this));
+		} else if (!isNaN(request.params.id)) {
+			return equipment.loadById(request.params.id, (function(error) {
+				if (error) {
+					return sendError(error, response);
+				}
+
+				return sendSuccess(equipment, response);
+			}).bind(this));
+		} else {
+			return sendError("Invalid ID format", response);
+		}
+	});
+
+	app.get('/api/:version/equipment', function(request, response, next) {
 		// search, sort, and filter
 		sendSuccess('hooray', response);
 	});
 
-	app.get('/equipment/:id', function(request, response, next) {
-		// equipment by id or barcode
-		if (!request.params.id) {
-			return sendError('Invalid ID', response);
-		}
-
-		var equipment = new Equipment();
-		equipment.loadById(request.params.id, (function(error) {
-			if (error) {
-				return sendError(error, response);
-			}
-
-			return sendSuccess(equipment, response);
-		}).bind(this));
-	});
-
-	app.post('/equipment', function(request, response, next) {
+	app.post('/api/:version/equipment', function(request, response, next) {
 		// create new equipment object
 	});
 
-	app.post('/equipment/:id', function(request, response, next) {
+	app.post('/api/:version/equipment/:id', (function(request, response, next) {
 		// update equipment object
-	});
+	}).bind(this));
 };

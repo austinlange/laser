@@ -1,4 +1,4 @@
-var User = require('../lib/user');
+var User = require('../../lib/user');
 
 module.exports = function(app) {
 	var sendError = function(message, response) {
@@ -69,7 +69,7 @@ module.exports = function(app) {
 		}).bind(this));
 	});
 
-	app.get("/api/:version/user/:id", function(request, response, next) {
+	app.get("/api/:version/user/:id", (function(request, response, next) {
 		if (!request.params.id) {
 			return sendError("Missing required parameter 'id'");
 		}
@@ -78,10 +78,10 @@ module.exports = function(app) {
 
 		var respond = (function(error) {
 			if (error) {
-				return sendError(error, response);
+				return sendError(error.message, response);
 			}
 
-			return sendObject(user, response);
+			return sendSuccess(user.toJSON(), response);
 		}).bind(this);
 
 		if (isNaN(request.params.id)) {
@@ -91,7 +91,7 @@ module.exports = function(app) {
 			console.log("Looking up user by ID: %d", request.params.id);
 			user.loadById(request.params.id, respond);
 		}
-	});
+	}).bind(this));
 
 	// 404 everything else
     app.all(/^\/api\/.*/, function(request, response, next) { 

@@ -52,6 +52,10 @@ module.exports = function(app) {
 			missingFields.push("login");
 		}
 
+		if (!request.body.password) {
+			missingFields.push("password");
+		}
+
 		if (missingFields.length > 0) {
 			return sendError("Missing fields: " + missingFields.join(", "), response);
 		} 
